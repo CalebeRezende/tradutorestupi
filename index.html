@@ -1,40 +1,49 @@
-!DOCTYPE html
-html lang=pt
-head
-    meta charset=UTF-8
-    meta name=viewport content=width=device-width, initial-scale=1.0
-    titleDicionário Tupi-Portuguêstitle
-    style
-        body { font-family Arial, sans-serif; text-align center; padding 20px; }
-        input { padding 8px; width 250px; }
-        button { padding 8px; cursor pointer; }
-        p { font-size 18px; font-weight bold; margin-top 10px; }
-    style
-head
-body
-    h1Dicionário Tupi-Portuguêsh1
-    input type=text id=search placeholder=Digite uma palavra em português...
-    button onclick=searchWord()Pesquisarbutton
-    p id=resultp
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dicionário Tupi-Português</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
+        h1 { color: #333; }
+        input { padding: 10px; width: 250px; margin-top: 10px; }
+        button { padding: 10px; cursor: pointer; background-color: #007bff; color: white; border: none; }
+        button:hover { background-color: #0056b3; }
+        p { font-size: 18px; font-weight: bold; margin-top: 10px; color: #333; }
+    </style>
+</head>
+<body>
+    <h1>Dicionário Tupi-Português</h1>
+    <input type="text" id="search" placeholder="Digite uma palavra em português...">
+    <button onclick="searchWord()">Pesquisar</button>
+    <p id="result"></p>
 
-    script
+    <script>
         let dictionary = {};
 
-         Carrega o arquivo JSON com as palavras
-        fetch(dictionary.json)
-            .then(response = response.json())
-            .then(data = {
-                dictionary = data;
+        // Tenta carregar o arquivo JSON
+        fetch("dictionary.json")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erro ao carregar o JSON");
+                }
+                return response.json();
             })
-            .catch(error = {
-                console.error(Erro ao carregar o dicionário, error);
+            .then(data => {
+                dictionary = data;
+                console.log("Dicionário carregado com sucesso!", dictionary);
+            })
+            .catch(error => {
+                console.error("Erro ao carregar o dicionário:", error);
+                document.getElementById("result").innerText = "Erro ao carregar dicionário!";
             });
 
         function searchWord() {
-            let word = document.getElementById(search).value.trim().toLowerCase();
-            let translation = dictionary[word]  Tradução não encontrada;
-            document.getElementById(result).innerText = Tradução  + translation;
+            let word = document.getElementById("search").value.trim().toLowerCase();
+            let translation = dictionary[word] || "Tradução não encontrada";
+            document.getElementById("result").innerText = "Tradução: " + translation;
         }
-    script
-body
-html
+    </script>
+</body>
+</html>
