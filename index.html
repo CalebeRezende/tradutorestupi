@@ -19,7 +19,7 @@
     <h1>Dicionário Tupi-Português</h1>
     <input type="text" id="search" placeholder="Digite uma palavra em português...">
     <button onclick="searchWord()">Pesquisar</button>
-    <p id="result"></p>
+    <p id="result">Digite uma palavra para buscar.</p>
 
     <h2>Histórico de Pesquisas</h2>
     <div id="history"></div>
@@ -55,7 +55,7 @@
                 }
             }
 
-            document.getElementById("result").innerText = "Tradução: " + translation;
+            document.getElementById("result").innerText = `Tradução: ${translation}`;
 
             // Adicionar ao histórico
             if (word) {
