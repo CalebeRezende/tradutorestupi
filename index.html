@@ -11,6 +11,8 @@
         button { padding: 10px; cursor: pointer; background-color: #007bff; color: white; border: none; }
         button:hover { background-color: #0056b3; }
         p { font-size: 18px; font-weight: bold; margin-top: 10px; color: #333; }
+        #history { margin-top: 20px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
+        .history-item { background: white; padding: 8px; margin: 5px 0; border-radius: 5px; box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); }
     </style>
 </head>
 <body>
@@ -19,12 +21,20 @@
     <button onclick="searchWord()">Pesquisar</button>
     <p id="result"></p>
 
+    <h2>Histórico de Pesquisas</h2>
+    <div id="history"></div>
+
     <script>
         let dictionary = [];
 
         // Carrega o JSON corretamente
         fetch("dictionary.json")
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erro ao carregar o JSON");
+                }
+                return response.json();
+            })
             .then(data => {
                 dictionary = data.Planilha1; // Acessa a lista de palavras dentro de "Planilha1"
                 console.log("Dicionário carregado com sucesso!", dictionary);
@@ -46,7 +56,41 @@
             }
 
             document.getElementById("result").innerText = "Tradução: " + translation;
+
+            // Adicionar ao histórico
+            if (word) {
+                addToHistory(word, translation);
+            }
         }
+
+        function addToHistory(word, translation) {
+            let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
+            history.unshift({ word, translation }); // Adiciona a nova busca no topo
+
+            // Limita o histórico a 10 buscas mais recentes
+            if (history.length > 10) {
+                history.pop();
+            }
+
+            localStorage.setItem("searchHistory", JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
+            let historyDiv = document.getElementById("history");
+            historyDiv.innerHTML = ""; // Limpa antes de re-renderizar
+
+            history.forEach(item => {
+                let entry = document.createElement("div");
+                entry.className = "history-item";
+                entry.innerText = `🔎 ${item.word} → ${item.translation}`;
+                historyDiv.appendChild(entry);
+            });
+        }
+
+        // Carrega o histórico ao abrir a página
+        renderHistory();
     </script>
 </body>
 </html>
