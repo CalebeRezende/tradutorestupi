@@ -20,18 +20,13 @@
     <p id="result"></p>
 
     <script>
-        let dictionary = {};
+        let dictionary = [];
 
-        // Tenta carregar o arquivo JSON
+        // Carrega o JSON corretamente
         fetch("dictionary.json")
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error("Erro ao carregar o JSON");
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                dictionary = data;
+                dictionary = data.Planilha1; // Acessa a lista de palavras dentro de "Planilha1"
                 console.log("Dicionário carregado com sucesso!", dictionary);
             })
             .catch(error => {
@@ -41,7 +36,15 @@
 
         function searchWord() {
             let word = document.getElementById("search").value.trim().toLowerCase();
-            let translation = dictionary[word] || "Tradução não encontrada";
+            let translation = "Tradução não encontrada";
+
+            if (dictionary.length > 0) {
+                let found = dictionary.find(entry => entry.Portugues.toLowerCase() === word);
+                if (found) {
+                    translation = found["Tupi Antigo"];
+                }
+            }
+
             document.getElementById("result").innerText = "Tradução: " + translation;
         }
     </script>
