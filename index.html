@@ -7,14 +7,23 @@
     <style>
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #e3f2fd; }
         h1 { color: #333; }
-        .container, .add-word-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); display: inline-block; margin-top: 10px; }
+        .container, .add-word-container { 
+            background: white; padding: 20px; border-radius: 10px; 
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); display: inline-block; margin-top: 10px; 
+        }
         input { padding: 10px; width: 250px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; margin-left: 5px; }
+        button { 
+            padding: 10px; cursor: pointer; background-color: #007bff; 
+            color: white; border: none; border-radius: 5px; margin-left: 5px; 
+        }
         button:hover { background-color: #0056b3; }
         p { font-size: 18px; font-weight: bold; margin-top: 10px; color: #333; }
         #history { margin-top: 20px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
-        .history-item { background: white; padding: 8px; margin: 5px 0; border-radius: 5px; box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); }
-        .not-found { color: red; }
+        .history-item { 
+            background: white; padding: 8px; margin: 5px 0; border-radius: 5px; 
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); 
+        }
+        .not-found { color: red; font-weight: bold; }
         .delete-btn { background-color: red; margin-top: 10px; }
         .delete-btn:hover { background-color: darkred; }
     </style>
@@ -75,7 +84,7 @@
 
             document.getElementById("result").innerHTML = `Tradução: <span class="${found ? '' : 'not-found'}">${translation}</span>`;
 
-            // Adicionar ao histórico
+            // Garantir que a palavra sempre entre no histórico, mesmo se não for encontrada
             addToHistory(word, translation);
         }
 
@@ -116,6 +125,13 @@
 
             if (!newWord || !newTranslation) {
                 document.getElementById("add-result").innerText = "Por favor, preencha os dois campos!";
+                return;
+            }
+
+            // Verifica se a palavra já existe
+            let exists = dictionary.find(entry => entry.Portugues.toLowerCase() === newWord);
+            if (exists) {
+                document.getElementById("add-result").innerText = "Essa palavra já existe no dicionário!";
                 return;
             }
 
