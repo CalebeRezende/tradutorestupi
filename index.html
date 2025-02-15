@@ -5,21 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dicionário Tupi-Português</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f4; }
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #e3f2fd; }
         h1 { color: #333; }
-        input { padding: 10px; width: 250px; margin-top: 10px; }
-        button { padding: 10px; cursor: pointer; background-color: #007bff; color: white; border: none; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); display: inline-block; }
+        input { padding: 10px; width: 250px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px; margin-left: 5px; }
         button:hover { background-color: #0056b3; }
         p { font-size: 18px; font-weight: bold; margin-top: 10px; color: #333; }
         #history { margin-top: 20px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
         .history-item { background: white; padding: 8px; margin: 5px 0; border-radius: 5px; box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1); }
+        .not-found { color: red; }
     </style>
 </head>
 <body>
     <h1>Dicionário Tupi-Português</h1>
-    <input type="text" id="search" placeholder="Digite uma palavra em português...">
-    <button onclick="searchWord()">Pesquisar</button>
-    <p id="result">Digite uma palavra para buscar.</p>
+    <div class="container">
+        <input type="text" id="search" placeholder="Digite uma palavra em português...">
+        <button onclick="searchWord()">Pesquisar</button>
+        <p id="result">Digite uma palavra para buscar.</p>
+    </div>
 
     <h2>Histórico de Pesquisas</h2>
     <div id="history"></div>
@@ -46,21 +50,19 @@
 
         function searchWord() {
             let word = document.getElementById("search").value.trim().toLowerCase();
-            let translation = "Tradução não encontrada";
+            if (!word) return;
 
-            if (dictionary.length > 0) {
-                let found = dictionary.find(entry => entry.Portugues.toLowerCase() === word);
-                if (found) {
-                    translation = found["Tupi Antigo"];
-                }
+            let translation = "Tradução não encontrada";
+            let found = dictionary.find(entry => entry.Portugues.toLowerCase() === word);
+
+            if (found) {
+                translation = found["Tupi Antigo"];
             }
 
-            document.getElementById("result").innerText = `Tradução: ${translation}`;
+            document.getElementById("result").innerHTML = `Tradução: <span class="${found ? '' : 'not-found'}">${translation}</span>`;
 
             // Adicionar ao histórico
-            if (word) {
-                addToHistory(word, translation);
-            }
+            addToHistory(word, translation);
         }
 
         function addToHistory(word, translation) {
@@ -84,7 +86,7 @@
             history.forEach(item => {
                 let entry = document.createElement("div");
                 entry.className = "history-item";
-                entry.innerText = `🔎 ${item.word} → ${item.translation}`;
+                entry.innerHTML = `🔎 <strong>${item.word}</strong> → <span class="${item.translation === 'Tradução não encontrada' ? 'not-found' : ''}">${item.translation}</span>`;
                 historyDiv.appendChild(entry);
             });
         }
