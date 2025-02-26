@@ -5,8 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dicionário Tupi-Português</title>
     <style>
-        /* ... (seu CSS existente) ... */
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #e3f2fd; }
+        h1 { color: #333; }
+        .container, .add-word-container {
+            background: white; padding: 20px; border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); display: inline-block; margin-top: 10px;
+        }
+        input { padding: 10px; width: 250px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button {
+            padding: 10px; cursor: pointer; background-color: #007bff;
+            color: white; border: none; border-radius: 5px; margin-left: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        p { font-size: 18px; font-weight: bold; margin-top: 10px; color: #333; }
+        #history { margin-top: 20px; text-align: left; max-width: 400px; margin-left: auto; margin-right: auto; }
+        .history-item {
+            background: white; padding: 8px; margin: 5px 0; border-radius: 5px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+        }
         .not-found { color: red; font-weight: bold; }
+        .delete-btn { background-color: red; margin-top: 10px; }
+        .delete-btn:hover { background-color: darkred; }
         .alert {
             padding: 10px;
             background-color: #f44336; /* Vermelho claro */
@@ -28,10 +47,11 @@
         </select>
         <button onclick="searchWord()">Pesquisar</button>
         <p id="result">Digite uma palavra para buscar.</p>
-        <div id="alert" class="alert">Palavra não encontrada!</div> </div>
+        <div id="alert" class="alert">Palavra não encontrada!</div>
+    </div>
 
     <h2>Histórico de Pesquisas</h2>
-    <button class="delete-btn" onclick="clearHistory()">🗑 Apagar Histórico</button>
+    <button class="delete-btn" onclick="clearHistory()"> Apagar Histórico</button>
     <div id="history"></div>
 
     <h2>Adicionar Nova Palavra</h2>
@@ -45,7 +65,29 @@
     <script>
         let dictionary = [];
 
-        // ... (funções loadDictionary, addToHistory, renderHistory, clearHistory, addNewWord existentes) ...
+        function corrigirJson(texto) {
+            const regex = /,\s*([\]\}])/g;
+            return texto.replace(regex, "$1");
+        }
+
+        function loadDictionary() {
+            fetch("dictionary.json")
+                .then(response => response.text())
+                .then(texto => {
+                    const jsonCorrigido = corrigirJson(texto);
+                    try {
+                        dictionary = JSON.parse(jsonCorrigido).Planilha1;
+                        console.log("Dicionário carregado com sucesso!", dictionary);
+                    } catch (erro) {
+                        console.error("Erro ao parsear o JSON corrigido:", erro);
+                        document.getElementById("result").innerText = "Erro ao carregar dicionário!";
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro ao carregar o dicionário:", error);
+                    document.getElementById("result").innerText = "Erro ao carregar dicionário!";
+                });
+        }
 
         function searchWord() {
             let word = document.getElementById("search").value.trim().toLowerCase();
@@ -69,7 +111,7 @@
                 }
             }
 
-            document.getElementById("result").innerHTML = `Tradução: <span class="${found ? '' : 'not-found'}">${translation}</span>`;
+            document.getElementById("result").innerHTML = `Tradução: <span class="<span class="math-inline">\{found ? '' \: 'not\-found'\}"\></span>{translation}</span>`;
             addToHistory(word, translation);
 
             if (!found) {
@@ -79,8 +121,65 @@
             }
         }
 
+        function addToHistory(word, translation) {
+            let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
+            history.unshift({ word, translation }); // Adiciona a nova busca no topo
 
-        // ... (resto do seu código JavaScript) ...
+            // Limita o histórico a 10 buscas mais recentes
+            if (history.length > 10) {
+                history.pop();
+            }
+
+            localStorage.setItem("searchHistory", JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            let history = JSON.parse(localStorage.getItem("searchHistory")) || [];
+            let historyDiv = document.getElementById("history");
+            historyDiv.innerHTML = ""; // Limpa antes de re-renderizar
+
+            history.forEach(item => {
+                let entry = document.createElement("div");
+                entry.className = "history-item";
+                entry.innerHTML = ` <strong><span class="math-inline">\{item\.word\}</strong\> → <span class\="</span>{item.translation === 'Tradução não encontrada' ? 'not-found' : ''}">${item.translation}</span>`;
+                historyDiv.appendChild(entry);
+            });
+        }
+
+        function clearHistory() {
+            localStorage.removeItem("searchHistory");
+            renderHistory();
+        }
+
+        function addNewWord() {
+            let newWord = document.getElementById("new-word").value.trim().toLowerCase();
+            let newTranslation = document.getElementById("new-translation").value.trim().toLowerCase();
+
+            if (!newWord || !newTranslation) {
+                document.getElementById("add-result").innerText = "Por favor, preencha os dois campos!";
+                return;
+            }
+
+            // Verifica se a palavra já existe
+            let exists = dictionary.find(entry => entry.Portugues.toLowerCase() === newWord);
+            if (exists) {
+                document.getElementById("add-result").innerText = "Essa palavra já existe no dicionário!";
+                return;
+            }
+
+            // Adiciona ao dicionário carregado
+            dictionary.push({ "Portugues": newWord, "Tupi Antigo": newTranslation });
+
+            // Salva no localStorage como se fosse o JSON (simulação)
+            localStorage.setItem("dictionaryData", JSON.stringify(dictionary));
+
+            document.getElementById("add-result").innerText = "Palavra adicionada com sucesso!";
+            document.getElementById("new-word").value = "";
+            document.getElementById("new-translation").value = "";
+
+            console.log("Nova palavra adicionada ao dicionário:", dictionary);
+        }
 
         // Carrega o histórico ao abrir a página
         renderHistory();
@@ -89,8 +188,4 @@
         // Se já adicionaram palavras antes, carrega o dicionário salvo no localStorage
         let savedDictionary = localStorage.getItem("dictionaryData");
         if (savedDictionary) {
-            dictionary = JSON.parse(savedDictionary);
-        }
-    </script>
-</body>
-</html>
+            dictionary =
